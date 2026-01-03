@@ -22,6 +22,19 @@ class _DashboardScreenState extends State<DashboardScreen>
   int totalProblems = 156;
   int myRank = 42;
 
+  // 캘린더 데이터 (날짜: 풀은 문제 수)
+  final Map<String, int> solvedProblems = {
+    '2026-01-01': 5,
+    '2026-01-02': 3,
+    '2026-01-03': 2,
+    '2025-12-28': 8,
+    '2025-12-29': 4,
+    '2025-12-30': 6,
+    '2025-12-31': 7,
+  };
+
+  DateTime selectedMonth = DateTime.now();
+
   final String baseUrl = 'http://localhost:8080/api';
 
   @override
@@ -186,6 +199,31 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                 const SliverToBoxAdapter(child: SizedBox(height: 32)),
 
+                // 학습 캘린더
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '학습 기록',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[900],
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildCalendar(),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
                 // 랭킹
                 SliverToBoxAdapter(
                   child: Padding(
@@ -279,34 +317,188 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
 
                 const SliverToBoxAdapter(child: SizedBox(height: 32)),
-
-                // 메뉴
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        _buildMenuItem('문제 풀기', Icons.edit_note, () {}),
-                        const SizedBox(height: 8),
-                        _buildMenuItem('전체 랭킹', Icons.leaderboard, () {}),
-                        const SizedBox(height: 8),
-                        _buildMenuItem(
-                          '학습 통계',
-                          Icons.insert_chart_outlined,
-                          () {},
-                        ),
-                        const SizedBox(height: 8),
-                        _buildMenuItem('설정', Icons.settings_outlined, () {}),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCalendar() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FBFF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          // 월 선택
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    selectedMonth = DateTime(
+                      selectedMonth.year,
+                      selectedMonth.month - 1,
+                    );
+                  });
+                },
+                icon: Icon(Icons.chevron_left, color: Colors.grey[600]),
+              ),
+              Text(
+                '${selectedMonth.year}년 ${selectedMonth.month}월',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[900],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    selectedMonth = DateTime(
+                      selectedMonth.year,
+                      selectedMonth.month + 1,
+                    );
+                  });
+                },
+                icon: Icon(Icons.chevron_right, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 요일 헤더
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: ['일', '월', '화', '수', '목', '금', '토'].map((day) {
+              return Expanded(
+                child: Center(
+                  child: Text(
+                    day,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          // 날짜 그리드
+          _buildCalendarGrid(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalendarGrid() {
+    final firstDay = DateTime(selectedMonth.year, selectedMonth.month, 1);
+    final lastDay = DateTime(selectedMonth.year, selectedMonth.month + 1, 0);
+    final daysInMonth = lastDay.day;
+    final startWeekday = firstDay.weekday % 7; // 0: 일요일
+
+    List<Widget> dayWidgets = [];
+
+    // 빈 칸 추가
+    for (int i = 0; i < startWeekday; i++) {
+      dayWidgets.add(const SizedBox());
+    }
+
+    // 날짜 추가
+    for (int day = 1; day <= daysInMonth; day++) {
+      final date = DateTime(selectedMonth.year, selectedMonth.month, day);
+      final dateString =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+      final problemCount = solvedProblems[dateString] ?? 0;
+      final isToday =
+          date.year == DateTime.now().year &&
+          date.month == DateTime.now().month &&
+          date.day == DateTime.now().day;
+
+      dayWidgets.add(_buildDayCell(day, problemCount, isToday));
+    }
+
+    return Column(
+      children: List.generate((dayWidgets.length / 7).ceil(), (weekIndex) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: dayWidgets
+                .skip(weekIndex * 7)
+                .take(7)
+                .map((widget) => Expanded(child: widget))
+                .toList(),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildDayCell(int day, int problemCount, bool isToday) {
+    Color backgroundColor;
+    Color textColor;
+
+    if (problemCount == 0) {
+      backgroundColor = Colors.transparent;
+      textColor = Colors.grey[400]!;
+    } else if (problemCount <= 3) {
+      backgroundColor = const Color(0xFFB0E0E6).withOpacity(0.3);
+      textColor = const Color(0xFF4A90E2);
+    } else if (problemCount <= 6) {
+      backgroundColor = const Color(0xFF87CEEB).withOpacity(0.5);
+      textColor = const Color(0xFF4A90E2);
+    } else {
+      backgroundColor = const Color(0xFF87CEEB);
+      textColor = Colors.white;
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(2),
+      child: Stack(
+        children: [
+          Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(8),
+              border: isToday
+                  ? Border.all(color: const Color(0xFF87CEEB), width: 2)
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                '$day',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ),
+          if (problemCount > 0)
+            Positioned(
+              bottom: 2,
+              right: 2,
+              child: Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: problemCount > 6
+                      ? Colors.white
+                      : const Color(0xFF87CEEB),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
