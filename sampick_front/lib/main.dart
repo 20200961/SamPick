@@ -14,9 +14,12 @@ class MyApp extends StatelessWidget {
       title: 'Sampick',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black87),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF87CEEB),
+          primary: const Color(0xFF87CEEB),
+        ),
         useMaterial3: true,
-        fontFamily: 'Pretendard', // 원하는 폰트로 변경 가능
+        fontFamily: 'Pretendard',
       ),
       home: const LoginScreen(),
     );
