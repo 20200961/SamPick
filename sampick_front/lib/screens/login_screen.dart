@@ -1,10 +1,9 @@
-// sampick_front/lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
-import 'dashboard_screen.dart';
+import 'main_navigation.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -60,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen>
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
           );
         }
         return;
@@ -87,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen>
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+              MaterialPageRoute(builder: (_) => const MainNavigation()),
             );
           }
         } else {
