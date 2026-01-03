@@ -1,8 +1,10 @@
+// sampick_front/lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_screen.dart';
 import 'forgot_password_screen.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,6 +51,22 @@ class _LoginScreenState extends State<LoginScreen>
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
+      // 임시 테스트 로그인 (이메일: 1, 비밀번호: 1)
+      await Future.delayed(const Duration(seconds: 1)); // 로딩 시뮬레이션
+
+      if (_emailController.text == '1@1' &&
+          _passwordController.text == '111111') {
+        setState(() => _isLoading = false);
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DashboardScreen()),
+          );
+        }
+        return;
+      }
+
+      // 실제 API 호출 (백엔드 연결 시 주석 해제)
       try {
         final response = await http.post(
           Uri.parse('$baseUrl/login'),
@@ -67,19 +85,10 @@ class _LoginScreenState extends State<LoginScreen>
           // await storage.write(key: 'jwt_token', value: token);
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('로그인 성공!'),
-                backgroundColor: const Color(0xFF87CEEB),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                margin: const EdgeInsets.all(20),
-              ),
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
             );
-            // 홈 화면으로 이동
-            // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
           }
         } else {
           if (mounted) {
@@ -100,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('네트워크 오류: $e'),
+              content: Text('이메일 또는 비밀번호가 올바르지 않습니다'),
               backgroundColor: Colors.red[400],
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
