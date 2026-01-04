@@ -34,16 +34,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        //인증없이 가능한 경우
-                        .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
+                        // 로그인, 회원가입은 인증 없이 허용
+                        .requestMatchers("/api/auth/**").permitAll()  // 이 부분 수정!
                         .requestMatchers(HttpMethod.POST,"/api/members").permitAll()
 
-                        //관리자 전용
+                        // 관리자 전용
                         .requestMatchers(HttpMethod.GET, "/api/members").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/members/search").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/members/**").hasRole("ADMIN")
 
-                        //나머지경로
+                        // 나머지
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -54,11 +52,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        // Flutter 앱을 위한 설정 추가
+        corsConfiguration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:*",  // Flutter 개발 서버
+                "http://10.0.2.2:8080"  // Android 에뮬레이터
+        ));
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.setAllowCredentials(true); //인증정보를 포함한 cors요청 허용
-        corsConfiguration.setMaxAge(3600L); //1시간
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

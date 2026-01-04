@@ -3,7 +3,19 @@ spring:
     name: sampick
 
     datasource:
-    url: jdbc:mysql://localhost:3306/sampick?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: 비밀번호
-    driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/sampick?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      username: root
+      password: 비밀번호
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+      jpa:
+        hibernate:
+          ddl-auto: update  # 개발 시: update, 운영 시: validate
+        show-sql: true
+        properties:
+          hibernate:
+            format_sql: true
+            dialect: org.hibernate.dialect.MySQLDialect
+jwt:
+  secret: sampick-secret-key-for-jwt-token-generation-must-be-long-enough-256-bits
+  expiration: 86400000  # 24시간
