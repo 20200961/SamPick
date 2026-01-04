@@ -18,7 +18,6 @@ public class JwtTokenProvider {
     private final SecretKey secretKey;
     private final long expiration;
 
-    // 생성자에서 secret과 expiration 주입
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration}") long expiration) {
@@ -31,7 +30,7 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
-        //claim은 JWT 안에 들어가는 커스텀 데이터.
+
         return Jwts.builder()
                 .subject(userId)
                 .claim("role", role)
@@ -68,7 +67,6 @@ public class JwtTokenProvider {
 
     /**
      * 토큰 유효성 검증 및 Claims 반환
-     * 검증 성공 시 Claims를 포함한 Optional 반환, 실패 시 Optional.empty() 반환
      */
     public Optional<Claims> validateToken(String token) {
         try {

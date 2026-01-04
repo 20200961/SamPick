@@ -1,6 +1,6 @@
 package com.example.sampick.global.config;
 
-import com.kh.commu.global.security.JwtAuthenticationFilter;
+import com.example.sampick.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

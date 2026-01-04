@@ -1,6 +1,6 @@
 package com.example.sampick.global.security;
 
-import ch.qos.logback.core.util.StringUtil;
+import org.springframework.util.StringUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

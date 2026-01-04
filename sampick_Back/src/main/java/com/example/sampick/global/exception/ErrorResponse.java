@@ -11,7 +11,7 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL) // json직렬화시 null인 값은 포함하지 않는다.
+@JsonInclude(JsonInclude.Include.NON_NULL) // json직렬화했을떄 null인 값은 포함하지 않는다.
 public class ErrorResponse {
     private final String message;
     private final boolean success;
