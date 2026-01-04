@@ -20,10 +20,24 @@ class _SignupScreenState extends State<SignupScreen>
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
   bool _agreeToTerms = false;
+  bool _isEmailChecked = false;
+  bool _isEmailAvailable = false;
+  bool _isCheckingEmail = false;
+  String? _selectedSource;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
   final String baseUrl = 'http://localhost:8080/api/auth';
+
+  // 유입경로 옵션
+  final List<String> _sourceOptions = [
+    '검색 (Google, Naver 등)',
+    'SNS (Instagram, Facebook 등)',
+    '지인 추천',
+    '광고',
+    '블로그/커뮤니티',
+    '기타',
+  ];
 
   @override
   void initState() {
@@ -36,6 +50,16 @@ class _SignupScreenState extends State<SignupScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+
+    // 이메일 입력 변경 감지
+    _emailController.addListener(() {
+      if (_isEmailChecked) {
+        setState(() {
+          _isEmailChecked = false;
+          _isEmailAvailable = false;
+        });
+      }
+    });
   }
 
   @override
@@ -48,19 +72,75 @@ class _SignupScreenState extends State<SignupScreen>
     super.dispose();
   }
 
+  // 이메일 중복 확인
+  Future<void> _checkEmailDuplicate() async {
+    if (_emailController.text.isEmpty) {
+      _showSnackBar('이메일을 입력해주세요', isError: true);
+      return;
+    }
+
+    if (!_emailController.text.contains('@')) {
+      _showSnackBar('올바른 이메일 형식이 아닙니다', isError: true);
+      return;
+    }
+
+    setState(() => _isCheckingEmail = true);
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/check-email?email=${_emailController.text}'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final isAvailable = data['available'] ?? false;
+
+        setState(() {
+          _isEmailChecked = true;
+          _isEmailAvailable = isAvailable;
+        });
+
+        if (isAvailable) {
+          _showSnackBar('사용 가능한 이메일입니다', isError: false);
+        } else {
+          _showSnackBar('이미 사용 중인 이메일입니다', isError: true);
+        }
+      } else {
+        _showSnackBar('중복 확인에 실패했습니다', isError: true);
+      }
+    } catch (e) {
+      _showSnackBar('네트워크 오류가 발생했습니다', isError: true);
+    } finally {
+      setState(() => _isCheckingEmail = false);
+    }
+  }
+
+  void _showSnackBar(String message, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red[400] : const Color(0xFF87CEEB),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(20),
+      ),
+    );
+  }
+
   Future<void> _handleSignup() async {
     if (!_agreeToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('이용약관에 동의해주세요'),
-          backgroundColor: Colors.red[400],
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: const EdgeInsets.all(20),
-        ),
-      );
+      _showSnackBar('이용약관에 동의해주세요', isError: true);
+      return;
+    }
+
+    if (!_isEmailChecked || !_isEmailAvailable) {
+      _showSnackBar('이메일 중복 확인을 해주세요', isError: true);
+      return;
+    }
+
+    if (_selectedSource == null) {
+      _showSnackBar('유입경로를 선택해주세요', isError: true);
       return;
     }
 
@@ -75,53 +155,24 @@ class _SignupScreenState extends State<SignupScreen>
             'name': _nameController.text,
             'email': _emailController.text,
             'password': _passwordController.text,
+            'source': _selectedSource,
           }),
         );
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('회원가입이 완료되었습니다!'),
-                backgroundColor: const Color(0xFF87CEEB),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                margin: const EdgeInsets.all(20),
-              ),
-            );
+            _showSnackBar('회원가입이 완료되었습니다!', isError: false);
             Navigator.pop(context);
           }
         } else {
           final data = jsonDecode(response.body);
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(data['message'] ?? '회원가입에 실패했습니다'),
-                backgroundColor: Colors.red[400],
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                margin: const EdgeInsets.all(20),
-              ),
-            );
+            _showSnackBar(data['message'] ?? '회원가입에 실패했습니다', isError: true);
           }
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('네트워크 오류: $e'),
-              backgroundColor: Colors.red[400],
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              margin: const EdgeInsets.all(20),
-            ),
-          );
+          _showSnackBar('네트워크 오류: $e', isError: true);
         }
       } finally {
         setState(() => _isLoading = false);
@@ -217,48 +268,106 @@ class _SignupScreenState extends State<SignupScreen>
 
                     const SizedBox(height: 20),
 
-                    // 이메일 입력
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(fontSize: 16),
-                      decoration: InputDecoration(
-                        labelText: '이메일',
-                        labelStyle: TextStyle(color: Colors.grey[600]),
-                        floatingLabelStyle: const TextStyle(
-                          color: Color(0xFF87CEEB),
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF0F8FF),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF87CEEB),
-                            width: 2,
+                    // 이메일 입력 + 중복확인 버튼
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(fontSize: 16),
+                            decoration: InputDecoration(
+                              labelText: '이메일',
+                              labelStyle: TextStyle(color: Colors.grey[600]),
+                              floatingLabelStyle: const TextStyle(
+                                color: Color(0xFF87CEEB),
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFF0F8FF),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF87CEEB),
+                                  width: 2,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Colors.red),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 18,
+                              ),
+                              suffixIcon: _isEmailChecked
+                                  ? Icon(
+                                      _isEmailAvailable
+                                          ? Icons.check_circle
+                                          : Icons.cancel,
+                                      color: _isEmailAvailable
+                                          ? Colors.green
+                                          : Colors.red,
+                                    )
+                                  : null,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '이메일을 입력해주세요';
+                              }
+                              if (!value.contains('@')) {
+                                return '올바른 이메일 형식이 아닙니다';
+                              }
+                              return null;
+                            },
                           ),
                         ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.red),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: _isCheckingEmail
+                                ? null
+                                : _checkEmailDuplicate,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF87CEEB),
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.grey[300],
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                            ),
+                            child: _isCheckingEmail
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    '중복\n확인',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 18,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '이메일을 입력해주세요';
-                        }
-                        if (!value.contains('@')) {
-                          return '올바른 이메일 형식이 아닙니다';
-                        }
-                        return null;
-                      },
+                      ],
                     ),
 
                     const SizedBox(height: 20),
@@ -375,6 +484,66 @@ class _SignupScreenState extends State<SignupScreen>
                         }
                         if (value != _passwordController.text) {
                           return '비밀번호가 일치하지 않습니다';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // 유입경로 선택 (드롭다운)
+                    DropdownButtonFormField<String>(
+                      value: _selectedSource,
+                      decoration: InputDecoration(
+                        labelText: '유입경로',
+                        labelStyle: TextStyle(color: Colors.grey[600]),
+                        floatingLabelStyle: const TextStyle(
+                          color: Color(0xFF87CEEB),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF0F8FF),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF87CEEB),
+                            width: 2,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.red),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 18,
+                        ),
+                      ),
+                      hint: Text(
+                        '어떻게 알게 되셨나요?',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      icon: const Icon(
+                        Icons.arrow_drop_down,
+                        color: Color(0xFF87CEEB),
+                      ),
+                      items: _sourceOptions.map((String source) {
+                        return DropdownMenuItem<String>(
+                          value: source,
+                          child: Text(source),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedSource = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return '유입경로를 선택해주세요';
                         }
                         return null;
                       },
