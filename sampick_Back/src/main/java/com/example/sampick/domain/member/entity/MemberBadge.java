@@ -1,4 +1,4 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserBadge {
+public class MemberBadge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +28,11 @@ public class UserBadge {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_id", nullable = false)
-    private User badge;
+    private Member badge;
 
     @CreationTimestamp
     @Column(name = "earned_at", nullable = false, updatable = false)

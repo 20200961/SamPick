@@ -1,5 +1,7 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.member.entity;
 
+import com.example.sampick.domain.progress.entity.DailyProgress;
+import com.example.sampick.domain.ranking.entity.Ranking;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,13 +54,13 @@ public class User {
     private String oauthId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserQuizHistory> quizHistories = new ArrayList<>();
+    private List<MemberQuizHistory> quizHistories = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserBadge> badges = new ArrayList<>();
+    private List<MemberBadge> badges = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserStreak streak;
+    private MemberStreak streak;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DailyProgress> dailyProgresses = new ArrayList<>();

@@ -1,5 +1,6 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.progress.entity;
 
+import com.example.sampick.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,7 +30,7 @@ public class DailyProgress {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Member member;
 
     @Column(name = "progress_date", nullable = false)
     private LocalDate progressDate;

@@ -1,5 +1,6 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.quiz.entity;
 
+import com.example.sampick.domain.member.entity.MemberQuizHistory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -53,5 +54,5 @@ public class Quiz {
     private List<QuizOption> options = new ArrayList<>();
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserQuizHistory> histories = new ArrayList<>();
+    private List<MemberQuizHistory> histories = new ArrayList<>();
 }

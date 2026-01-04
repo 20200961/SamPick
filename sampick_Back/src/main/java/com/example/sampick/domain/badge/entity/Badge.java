@@ -1,5 +1,6 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.badge.entity;
 
+import com.example.sampick.domain.member.entity.MemberBadge;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -43,5 +44,5 @@ public class Badge {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserBadge> userBadges = new ArrayList<>();
+    private List<MemberBadge> memberBadges = new ArrayList<>();
 }

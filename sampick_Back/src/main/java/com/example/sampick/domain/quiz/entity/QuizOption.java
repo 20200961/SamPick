@@ -1,4 +1,4 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.quiz.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

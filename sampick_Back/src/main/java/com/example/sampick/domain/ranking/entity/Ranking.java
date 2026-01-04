@@ -1,5 +1,6 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.ranking.entity;
 
+import com.example.sampick.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -30,7 +31,7 @@ public class Ranking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Member member;
 
     @Column(name = "total_score")
     private Integer totalScore = 0;

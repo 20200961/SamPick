@@ -1,4 +1,4 @@
-package com.example.sampick.entity;
+package com.example.sampick.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserStreak {
+public class MemberStreak {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class UserStreak {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+    private Member member;
 
     @Column(name = "current_streak")
     private Integer currentStreak = 0;
