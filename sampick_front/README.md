@@ -39,7 +39,9 @@ Frontend
 bashcd sampick_front
 flutter pub get
 flutter run
+
 Backend
+
 bashcd sampick_back
 ./gradlew bootRun
 테스트 계정
