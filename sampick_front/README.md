@@ -41,10 +41,8 @@ flutter pub get
 flutter run
 
 Backend
-
 bashcd sampick_back
 ./gradlew bootRun
 테스트 계정
-
 이메일: 1@1
 비밀번호: 111111

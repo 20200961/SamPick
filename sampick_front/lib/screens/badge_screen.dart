@@ -82,6 +82,7 @@ class BadgeScreen extends StatelessWidget {
                     badge['title'] as String,
                     badge['desc'] as String,
                     badge['unlocked'] as bool,
+                    
                   );
                 },
               ),
@@ -98,6 +99,7 @@ class BadgeScreen extends StatelessWidget {
     String desc,
     bool unlocked,
   ) {
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -119,6 +121,7 @@ class BadgeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+
           Text(
             title,
             style: TextStyle(
@@ -128,6 +131,7 @@ class BadgeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
+
           Text(
             desc,
             style: TextStyle(
