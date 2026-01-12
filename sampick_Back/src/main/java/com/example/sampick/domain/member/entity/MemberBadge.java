@@ -1,5 +1,6 @@
 package com.example.sampick.domain.member.entity;
 
+import com.example.sampick.domain.badge.entity.Badge;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,7 +33,7 @@ public class MemberBadge {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_id", nullable = false)
-    private Member badge;
+    private Badge badge;  // Member가 아니라 Badge!
 
     @CreationTimestamp
     @Column(name = "earned_at", nullable = false, updatable = false)
