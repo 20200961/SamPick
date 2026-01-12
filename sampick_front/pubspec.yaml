@@ -8,6 +8,7 @@ environment:
   sdk: ^3.10.4
 
 dependencies:
+  flutter_secure_storage: ^9.0.0
   flutter:
     sdk: flutter
 
