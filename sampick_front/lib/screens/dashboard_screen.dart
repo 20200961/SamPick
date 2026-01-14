@@ -13,7 +13,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
   // 샘플 데이터
   int todayProgress = 2;
   int todayTotal = 3;
@@ -21,7 +20,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   double accuracyRate = 85.5;
   int totalProblems = 156;
   int myRank = 42;
-
   // 캘린더 데이터 (날짜: 풀은 문제 수)
   final Map<String, int> solvedProblems = {
     '2026-01-01': 5,
@@ -73,7 +71,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Future<void> _loadDashboardData() async {
-    // TODO: API 호출
+    // 여기에 API 호출 코드를 추가하여 대시보드 데이터를 불러옵니다.
   }
 
   @override
@@ -88,7 +86,6 @@ class _DashboardScreenState extends State<DashboardScreen>
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // 헤더
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
