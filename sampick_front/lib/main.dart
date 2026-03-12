@@ -22,6 +22,6 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Pretendard',
       ),
       home: const MainNavigation(),
-    );
+    );~
   }
 }
