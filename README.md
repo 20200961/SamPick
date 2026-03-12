@@ -1,4 +1,4 @@
-# 🎯 SamPick (삼픽)
+# 🎯 SamPick (삼픽) -- 개발중
 
 > **하루 3가지 문제로 성장하는 플랫폼**  
 > **"Simplify Your Daily Learning, Three at a Time."**
